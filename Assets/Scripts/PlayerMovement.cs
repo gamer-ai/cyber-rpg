@@ -23,9 +23,12 @@ public class PlayerMovement : MonoBehaviour
 
     void MoveCharacter()
     {
-        Vector3 to = transform.position + change_ * speed_ *
-            Time.deltaTime;
-        playerRigid2D_.MovePosition(to);
+        if (change_ != Vector3.zero)
+        {
+            Vector3 to = transform.position + change_ * speed_ *
+                Time.deltaTime;
+            playerRigid2D_.MovePosition(to);
+        }
     }
 
     void AnimateCharacter()
