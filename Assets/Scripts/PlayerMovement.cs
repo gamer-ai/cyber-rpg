@@ -25,8 +25,8 @@ public class PlayerMovement : MonoBehaviour
     {
         if (change_ != Vector3.zero)
         {
-            Vector3 to = transform.position + change_ * speed_ *
-                Time.deltaTime;
+            Vector3 velocity = Vector3.Normalize(change_) * speed_;
+            Vector3 to = transform.position + velocity * Time.deltaTime;
             playerRigid2D_.MovePosition(to);
         }
     }
