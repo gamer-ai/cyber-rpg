@@ -11,8 +11,7 @@ public class PlayerMovement : MonoBehaviour
         animator_ = GetComponent<Animator>();
     }
 
-    // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         change_ = Vector3.zero;
         change_.x = Input.GetAxisRaw("Horizontal");
