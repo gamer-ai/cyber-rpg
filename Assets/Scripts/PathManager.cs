@@ -24,18 +24,31 @@ public class PathManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        List<PathFind.Point> points =
-            PathFind.Pathfinding.FindPath(world.CurrentGrid.Value,
-            new PathFind.Point(0, 0), new PathFind.Point(10, 10));
-        foreach (var point in points)
-        {
-            Debug.LogFormat("{0}, {1}", point.x, point.y);
-        }
+        
     }
 
-    public List<Vector2> FindCurrentPath(Vector2 worldStart, Vector2 wordTarget)
+    public List<Vector2Int> FindCurrentPath(Vector3 worldStart, Vector3 worldTarget)
     {
-        return null;
+        Vector2Int? start = world.WorldPosToGridPos(worldStart);
+        Vector2Int? target = world.WorldPosToGridPos(worldTarget);
+        if (start == null || target == null)
+        {
+            Debug.LogErrorFormat("Failed to convert world position {0} or " +
+                "{1} to grid cell position ", worldStart, worldTarget);
+            return null;
+        }
+        Debug.LogFormat("worldpos: {0}, cellpos: {1}", worldStart, start);
+        Debug.LogFormat("worldpos: {0}, cellpos: {1}", worldTarget, target);
+        List<PathFind.Point> points =
+            PathFind.Pathfinding.FindPath(world.CurrentGrid.Value,
+            new PathFind.Point(start.Value.x, start.Value.y),
+            new PathFind.Point(target.Value.x, target.Value.y));
+        List<Vector2Int> path = new List<Vector2Int>();
+        foreach (PathFind.Point point in points)
+        {
+            path.Add(new Vector2Int(point.x, point.y));
+        }
+        return path;
     }
 
     public World world;

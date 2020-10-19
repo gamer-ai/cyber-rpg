@@ -63,27 +63,53 @@ public class World : MonoBehaviour
         Tilemap ground = grid.transform.Find("Ground").GetComponent<Tilemap>();
         Tilemap collision =
             grid.transform.Find("Collision").GetComponent<Tilemap>();
-        int width = ground.cellBounds.size.x;
-        int height = ground.cellBounds.size.y;
         bool[,] movableTiles = new bool[MAX_WIDTH_OF_ROOM, MAX_HEIGHT_OF_ROOM];
-        for (int x = 0; x < width; ++x)
+        for (int x = ground.cellBounds.min.x; x < ground.cellBounds.max.x; ++x)
         {
-            for (int y = 0; y < height; ++y)
+            for (int y = ground.cellBounds.min.y; y < ground.cellBounds.max.y;
+                ++y)
             {
+                int r = x - ground.cellBounds.min.x;
+                int c = y - ground.cellBounds.min.y;
                 // All cell should be unreachable by default.
-                movableTiles[x, y] = false;
+                movableTiles[r, c] = false;
                 if (ground.HasTile(new Vector3Int(x, y, 0)))
                 {
-                    movableTiles[x, y] = true;
+                    movableTiles[r, c] = true;
                 }
                 if (collision.HasTile(new Vector3Int(x, y, 0)))
                 {
-                    movableTiles[x, y] = false;
+                    movableTiles[r, c] = false;
                 }
             }
         }
+        int width = ground.cellBounds.size.x;
+        int height = ground.cellBounds.size.y;
         PathFind.Grid pathGrid = new PathFind.Grid(width, height, movableTiles);
         return pathGrid;
+    }
+
+    public Vector2Int? WorldPosToGridPos(Vector3 worldPos)
+    {
+        string roomName = CurrentGrid.Key;
+        if (!GridsDict.ContainsKey(roomName))
+        {
+            Debug.LogErrorFormat(
+                "Didn't find room with name: {0}", roomName);
+            return null;
+        }
+        Tilemap ground = GridsDict[roomName].transform.Find("Ground")
+            .GetComponent<Tilemap>();
+        Vector3Int cellPosInt = ground.WorldToCell(worldPos);
+        if (!ground.cellBounds.Contains(cellPosInt))
+        {
+            Debug.LogErrorFormat("World position {0} is not in current grid " +
+                "cell bounds {1}.", cellPosInt, ground.cellBounds);
+            return null;
+        }
+        // Add xy offset to align with 2D arrary start point.
+        return new Vector2Int(cellPosInt.x - ground.cellBounds.min.x,
+            cellPosInt.y - ground.cellBounds.min.y);
     }
 
     public Tilemap[] Tilemaps { get; private set; }

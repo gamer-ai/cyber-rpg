@@ -14,11 +14,28 @@ public class PlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
-        change_ = Vector3.zero;
-        change_.x = Input.GetAxisRaw("Horizontal");
-        change_.y = Input.GetAxisRaw("Vertical");
-        MoveCharacter();
-        AnimateCharacter();
+        if (Input.GetMouseButtonDown(0))
+        {
+            target_ = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            Debug.LogFormat("{0}, {1}", target_.x, target_.y);
+            List<Vector2Int> path = PathManager.Instance.FindCurrentPath(
+                transform.position, target_);
+            if (path != null)
+            {
+                foreach (Vector2Int point in path)
+                {
+                    Debug.Log(point);
+                }
+            }
+        }
+        else
+        {
+            change_ = Vector3.zero;
+            change_.x = Input.GetAxisRaw("Horizontal");
+            change_.y = Input.GetAxisRaw("Vertical");
+            MoveCharacter();
+            AnimateCharacter();
+        }
     }
 
     void MoveCharacter()
@@ -48,5 +65,6 @@ public class PlayerMovement : MonoBehaviour
     public float speed_;
     private Rigidbody2D playerRigid2D_;
     private Vector3 change_;
+    private Vector3 target_;
     private Animator animator_;
 }
