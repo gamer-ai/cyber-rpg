@@ -27,7 +27,7 @@ public class PathManager : MonoBehaviour
         
     }
 
-    public List<Vector2Int> FindCurrentPath(Vector3 worldStart, Vector3 worldTarget)
+    public List<Vector3> FindCurrentPath(Vector3 worldStart, Vector3 worldTarget)
     {
         Vector2Int? start = world.WorldPosToGridPos(worldStart);
         Vector2Int? target = world.WorldPosToGridPos(worldTarget);
@@ -37,16 +37,22 @@ public class PathManager : MonoBehaviour
                 "{1} to grid cell position ", worldStart, worldTarget);
             return null;
         }
-        Debug.LogFormat("worldpos: {0}, cellpos: {1}", worldStart, start);
-        Debug.LogFormat("worldpos: {0}, cellpos: {1}", worldTarget, target);
         List<PathFind.Point> points =
             PathFind.Pathfinding.FindPath(world.CurrentGrid.Value,
             new PathFind.Point(start.Value.x, start.Value.y),
             new PathFind.Point(target.Value.x, target.Value.y));
-        List<Vector2Int> path = new List<Vector2Int>();
+        List<Vector3> path = new List<Vector3>();
         foreach (PathFind.Point point in points)
         {
-            path.Add(new Vector2Int(point.x, point.y));
+            Vector2Int gridPos = new Vector2Int(point.x, point.y);
+            Vector3? worldPoint = world.GridPosToWorldPos(gridPos);
+            if (worldPoint == null)
+            {
+                Debug.LogErrorFormat("Failed to convert grid cell position {0} "
+                    + "to world position.", gridPos);
+                continue;
+            }
+            path.Add(worldPoint.Value);
         }
         return path;
     }

@@ -50654,6 +50654,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: PoundToMain
       objectReference: {fileID: 0}
+    - target: {fileID: 4076501235442322150, guid: 91a39fb46b7e54a178e22f36d6744387,
+        type: 3}
+      propertyPath: m_TagString
+      value: RoomTransfer
+      objectReference: {fileID: 0}
     - target: {fileID: 4076501235442322200, guid: 91a39fb46b7e54a178e22f36d6744387,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -50752,6 +50757,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: MainToPound
+      objectReference: {fileID: 0}
+    - target: {fileID: 4076501235442322150, guid: 91a39fb46b7e54a178e22f36d6744387,
+        type: 3}
+      propertyPath: m_TagString
+      value: RoomTransfer
       objectReference: {fileID: 0}
     - target: {fileID: 4076501235442322200, guid: 91a39fb46b7e54a178e22f36d6744387,
         type: 3}

@@ -112,6 +112,23 @@ public class World : MonoBehaviour
             cellPosInt.y - ground.cellBounds.min.y);
     }
 
+    public Vector3? GridPosToWorldPos(Vector2Int gridPos)
+    {
+        string roomName = CurrentGrid.Key;
+        if (!GridsDict.ContainsKey(roomName))
+        {
+            Debug.LogErrorFormat(
+                "Didn't find room with name: {0}", roomName);
+            return null;
+        }
+        Tilemap ground = GridsDict[roomName].transform.Find("Ground")
+            .GetComponent<Tilemap>();
+        Vector3 worldPos = ground.CellToWorld(
+            new Vector3Int(gridPos.x + ground.cellBounds.min.x,
+            gridPos.y + ground.cellBounds.min.y, 0));
+        return worldPos;
+    }
+
     public Tilemap[] Tilemaps { get; private set; }
     public Dictionary<string, Grid> GridsDict { get; private set; }
     public KeyValuePair<string, PathFind.Grid> CurrentGrid { get; private set; }

@@ -1,40 +1,70 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Tilemaps;
 
 public class PlayerMovement : MonoBehaviour
 {
+    public readonly Vector3 PLAYER_POSITION_OFFSET = new Vector3(0, 0.7f, 0);
+
     // Start is called before the first frame update
     void Start()
     {
         playerRigid2D_ = GetComponent<Rigidbody2D>();
         animator_ = GetComponent<Animator>();
+        pathQueue_ = new Queue<Vector3>();
     }
 
     void FixedUpdate()
     {
+        change_ = Vector3.zero;
         if (Input.GetMouseButtonDown(0))
         {
+            // Use mouse to control.
             target_ = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            Debug.LogFormat("{0}, {1}", target_.x, target_.y);
-            List<Vector2Int> path = PathManager.Instance.FindCurrentPath(
+            List<Vector3> path = PathManager.Instance.FindCurrentPath(
                 transform.position, target_);
             if (path != null)
             {
-                foreach (Vector2Int point in path)
+                pathQueue_.Clear();
+                foreach (Vector3 point in path)
                 {
-                    Debug.Log(point);
+                    pathQueue_.Enqueue(point);
                 }
             }
         }
-        else
+        else if (Input.GetAxisRaw("Horizontal") != 0.0
+            || Input.GetAxisRaw("Vertical") != 0.0)
         {
-            change_ = Vector3.zero;
+            // Use keyboard to control.
+            pathQueue_.Clear();
             change_.x = Input.GetAxisRaw("Horizontal");
             change_.y = Input.GetAxisRaw("Vertical");
-            MoveCharacter();
-            AnimateCharacter();
+        }
+        else if (pathQueue_.Count > 0)
+        {
+            // Follow the path reading from the queue.
+            Vector3 firstPoint = pathQueue_.Peek() + PLAYER_POSITION_OFFSET;
+            if ((transform.position - firstPoint).magnitude < 0.5)
+            {
+                Debug.Log("reached");
+                pathQueue_.Dequeue();
+            }
+            else
+            {
+                Debug.LogFormat("moving to: {0}", firstPoint);
+                change_ = Vector3.Normalize(firstPoint - transform.position);
+            }
+        }
+        MoveCharacter();
+        AnimateCharacter();
+    }
+
+    private void OnTriggerEnter2D(Collider2D collider)
+    {
+        if (collider.CompareTag("RoomTransfer"))
+        {
+            // Move to next room then clean previous status.
+            change_ = Vector3.zero;
+            pathQueue_.Clear();
         }
     }
 
@@ -67,4 +97,5 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 change_;
     private Vector3 target_;
     private Animator animator_;
+    private Queue<Vector3> pathQueue_;
 }
