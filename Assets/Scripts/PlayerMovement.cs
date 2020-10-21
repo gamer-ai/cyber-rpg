@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    public readonly Vector3 PLAYER_POSITION_OFFSET = new Vector3(0, 0.7f, 0);
+    // public readonly Vector3 PLAYER_POSITION_OFFSET = new Vector3(0, 0.7f, 0);
 
     // Start is called before the first frame update
     void Start()
@@ -11,6 +11,7 @@ public class PlayerMovement : MonoBehaviour
         playerRigid2D_ = GetComponent<Rigidbody2D>();
         animator_ = GetComponent<Animator>();
         pathQueue_ = new Queue<Vector3>();
+        debugLine_ = GetComponent<LineRenderer>();
     }
 
     void FixedUpdate()
@@ -25,9 +26,13 @@ public class PlayerMovement : MonoBehaviour
             if (path != null)
             {
                 pathQueue_.Clear();
+                int index = 0;
+                debugLine_.positionCount = path.Count;
                 foreach (Vector3 point in path)
                 {
                     pathQueue_.Enqueue(point);
+                    debugLine_.SetPosition(index, new Vector3(point.x, point.y, -5.0f));
+                    index++;
                 }
             }
         }
@@ -42,15 +47,13 @@ public class PlayerMovement : MonoBehaviour
         else if (pathQueue_.Count > 0)
         {
             // Follow the path reading from the queue.
-            Vector3 firstPoint = pathQueue_.Peek() + PLAYER_POSITION_OFFSET;
+            Vector3 firstPoint = pathQueue_.Peek();
             if ((transform.position - firstPoint).magnitude < 0.5)
             {
-                Debug.Log("reached");
                 pathQueue_.Dequeue();
             }
             else
             {
-                Debug.LogFormat("moving to: {0}", firstPoint);
                 change_ = Vector3.Normalize(firstPoint - transform.position);
             }
         }
@@ -60,12 +63,11 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collider)
     {
-        if (collider.CompareTag("RoomTransfer"))
-        {
-            // Move to next room then clean previous status.
-            change_ = Vector3.zero;
-            pathQueue_.Clear();
-        }
+        Debug.Log(collider.name);
+        change_ = Vector3.zero;
+        pathQueue_.Clear();
+        MoveCharacter();
+        AnimateCharacter();
     }
 
     void MoveCharacter()
@@ -98,4 +100,5 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 target_;
     private Animator animator_;
     private Queue<Vector3> pathQueue_;
+    private LineRenderer debugLine_;
 }

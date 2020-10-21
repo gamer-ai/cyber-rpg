@@ -126,6 +126,8 @@ public class World : MonoBehaviour
         Vector3 worldPos = ground.CellToWorld(
             new Vector3Int(gridPos.x + ground.cellBounds.min.x,
             gridPos.y + ground.cellBounds.min.y, 0));
+        // Move position to cell center.
+        worldPos += new Vector3(ground.cellSize.x / 2.0f, ground.cellSize.y / 2.0f, 0.0f);
         return worldPos;
     }
 
