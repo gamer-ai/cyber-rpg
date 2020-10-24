@@ -63,7 +63,6 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collider)
     {
-        Debug.Log(collider.name);
         change_ = Vector3.zero;
         pathQueue_.Clear();
         MoveCharacter();
