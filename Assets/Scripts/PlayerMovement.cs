@@ -1,5 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+
+public enum PlayerSate
+{
+    WALK,
+    ATTACK,
+    ITERACT,
+    IDLE
+}
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -12,6 +21,7 @@ public class PlayerMovement : MonoBehaviour
         animator_ = GetComponent<Animator>();
         pathQueue_ = new Queue<Vector3>();
         debugLine_ = GetComponent<LineRenderer>();
+        playerSate_ = PlayerSate.IDLE;
     }
 
     void FixedUpdate()
@@ -35,6 +45,13 @@ public class PlayerMovement : MonoBehaviour
                     index++;
                 }
             }
+            playerSate_ = PlayerSate.WALK;
+        }
+        else if (Input.GetButtonDown("Attack") &&
+            playerSate_ != PlayerSate.ATTACK)
+        {
+            playerSate_ = PlayerSate.ATTACK;
+            StartCoroutine(ShowAttack());
         }
         else if (Input.GetAxisRaw("Horizontal") != 0.0
             || Input.GetAxisRaw("Vertical") != 0.0)
@@ -43,6 +60,7 @@ public class PlayerMovement : MonoBehaviour
             pathQueue_.Clear();
             change_.x = Input.GetAxisRaw("Horizontal");
             change_.y = Input.GetAxisRaw("Vertical");
+            playerSate_ = PlayerSate.WALK;
         }
         else if (pathQueue_.Count > 0)
         {
@@ -56,6 +74,7 @@ public class PlayerMovement : MonoBehaviour
             {
                 change_ = Vector3.Normalize(firstPoint - transform.position);
             }
+            playerSate_ = PlayerSate.WALK;
         }
         MoveCharacter();
         AnimateCharacter();
@@ -81,16 +100,35 @@ public class PlayerMovement : MonoBehaviour
 
     void AnimateCharacter()
     {
-        if (change_ != Vector3.zero)
+        switch (playerSate_)
         {
-            animator_.SetBool("isMoving", true);
-            animator_.SetFloat("moveX", change_.x);
-            animator_.SetFloat("moveY", change_.y);
+            case PlayerSate.WALK:
+                if (change_ != Vector3.zero)
+                {
+                    animator_.SetBool("isMoving", true);
+                    animator_.SetFloat("moveX", change_.x);
+                    animator_.SetFloat("moveY", change_.y);
+                }
+                else
+                {
+                    animator_.SetBool("isMoving", false);
+                }
+                break;
+            case PlayerSate.ATTACK:
+                break;
+            default:
+                // Clean animator states.
+                animator_.SetBool("isAttacking", false);
+                animator_.SetBool("isMoving", false);
+                break;
         }
-        else
-        {
-            animator_.SetBool("isMoving", false);
-        }
+    }
+
+    private IEnumerator ShowAttack() {
+        animator_.SetBool("isAttacking", true);
+        yield return new WaitForSeconds(0.3f);
+        animator_.SetBool("isAttacking", false);
+        playerSate_ = PlayerSate.IDLE;
     }
 
     public float speed_;
@@ -100,4 +138,5 @@ public class PlayerMovement : MonoBehaviour
     private Animator animator_;
     private Queue<Vector3> pathQueue_;
     private LineRenderer debugLine_;
+    private PlayerSate playerSate_;
 }
